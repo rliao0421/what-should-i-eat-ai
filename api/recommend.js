@@ -17,23 +17,21 @@ module.exports = async function handler(req, res) {
       messages: [
         {
           role: "system",
-          content: "You are a food recommendation tool. Return only valid JSON."
+          content: "Return only valid JSON. No markdown."
         },
         {
           role: "user",
           content: `
-User situation: ${mood}
+Situation: ${mood}
 Meal type: ${mealType}
 Preference: ${preference}
 Hunger level: ${hungerLevel}
 Cuisine: ${cuisine}
 
-Recommend one meal.
-
-Return only JSON:
+Return:
 {
   "food": "meal name",
-  "reason": "why this meal was chosen based on the user's answers",
+  "reason": "why this meal was chosen",
   "tags": ["tag1", "tag2", "tag3"]
 }
 `
@@ -41,7 +39,9 @@ Return only JSON:
       ]
     });
 
-    const text = response.choices[0].message.content;
+    let text = response.choices[0].message.content;
+    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+
     const recommendation = JSON.parse(text);
 
     return res.status(200).json(recommendation);
@@ -50,7 +50,7 @@ Return only JSON:
 
     return res.status(500).json({
       food: "Recommendation failed",
-      reason: "The system could not generate a recommendation. Check API key, credits, or server logs.",
+      reason: "The system could not generate a recommendation. Check API key, credits, or Vercel logs.",
       tags: ["Error"]
     });
   }
