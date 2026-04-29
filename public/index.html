@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>What Should I Eat?</title>
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at top left,#ffd6a5,transparent 40%),
+    radial-gradient(circle at bottom right,#ffadad,transparent 40%),
+    linear-gradient(135deg,#fff7ed,#ffe8cc);
+
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.app {
+  width: 95%;
+  max-width: 900px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 30px;
+  box-shadow: 0 25px 70px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+
+.hero {
+  background: linear-gradient(135deg,#f76707,#f03e3e);
+  color: white;
+  padding: 40px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 44px;
+  margin-bottom: 10px;
+}
+
+.hero p {
+  font-size: 18px;
+  opacity: 0.95;
+}
+
+.content {
+  padding: 30px;
+}
+
+label {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 15px;
+  border-radius: 18px;
+  border: 2px solid #ffd8a8;
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 15px;
+}
+
+select {
+  padding: 14px;
+  border-radius: 14px;
+  border: 2px solid #ffd8a8;
+  font-size: 15px;
+}
+
+button {
+  margin-top: 18px;
+  width: 100%;
+  padding: 16px;
+  border-radius: 18px;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+
+  background: linear-gradient(135deg,#f76707,#f03e3e);
+  color: white;
+
+  transition: 0.2s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+.result {
+  display: none;
+  margin-top: 25px;
+  padding: 25px;
+  border-radius: 20px;
+  background: linear-gradient(135deg,#fff9db,#fff4e6);
+  border: 2px solid #ffe066;
+}
+
+.food-title {
+  font-size: 32px;
+  color: #c92a2a;
+}
+
+.reason {
+  margin-top: 10px;
+  font-size: 17px;
+  color: #444;
+}
+
+.tags {
+  margin-top: 15px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 7px 12px;
+  margin: 4px;
+  background: white;
+  border-radius: 999px;
+  border: 1px solid #ffd8a8;
+  color: #d9480f;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.error {
+  display: none;
+  margin-top: 15px;
+  padding: 12px;
+  background: #ffe3e3;
+  color: #c92a2a;
+  border-radius: 12px;
+  font-weight: bold;
+}
+
+@media (max-width:700px) {
+
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .hero h1 {
+    font-size: 32px;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<div class="hero">
+<h1>What Should I Eat?</h1>
+<p>
+Answer a few questions and get a personalized meal recommendation.
+</p>
+</div>
+
+<div class="content">
+
+<label>Describe your situation</label>
+
+<textarea id="moodInput"
+placeholder="Example: I'm very hungry, want something filling, and prefer Asian food."></textarea>
+
+<div class="row">
+
+<select id="hungerLevel">
+
+<option value="any">Hunger level</option>
+<option value="light">Light snack</option>
+<option value="moderate">Moderately hungry</option>
+<option value="very">Very hungry</option>
+
+</select>
+
+<select id="cuisine">
+
+<option value="any">Cuisine preference</option>
+<option value="asian">Asian</option>
+<option value="american">American</option>
+<option value="italian">Italian</option>
+<option value="mexican">Mexican</option>
+
+</select>
+
+</div>
+
+<div class="row">
+
+<select id="mealType">
+
+<option value="any">Meal type</option>
+<option value="breakfast">Breakfast</option>
+<option value="lunch">Lunch</option>
+<option value="dinner">Dinner</option>
+<option value="snack">Snack</option>
+
+</select>
+
+<select id="preference">
+
+<option value="any">Special preference</option>
+<option value="healthy">Healthy</option>
+<option value="comfort">Comfort food</option>
+<option value="quick">Quick</option>
+<option value="cheap">Budget friendly</option>
+
+</select>
+
+</div>
+
+<button onclick="generateRecommendation()">
+
+Get Recommendation
+
+</button>
+
+<div id="errorMessage" class="error"></div>
+
+<div id="result" class="result">
+
+<h2 id="foodName" class="food-title"></h2>
+
+<p id="reason" class="reason"></p>
+
+<div id="tags" class="tags"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+async function generateRecommendation() {
+
+const mood =
+document.getElementById("moodInput").value;
+
+const hungerLevel =
+document.getElementById("hungerLevel").value;
+
+const cuisine =
+document.getElementById("cuisine").value;
+
+const mealType =
+document.getElementById("mealType").value;
+
+const preference =
+document.getElementById("preference").value;
+
+const result =
+document.getElementById("result");
+
+const errorMessage =
+document.getElementById("errorMessage");
+
+result.style.display = "none";
+errorMessage.style.display = "none";
+
+if (mood.trim() === "") {
+
+errorMessage.textContent =
+"Please describe your situation.";
+
+errorMessage.style.display = "block";
+
+return;
+
+}
+
+try {
+
+const response =
+await fetch("/api/recommend", {
+
+method: "POST",
+
+headers: {
+"Content-Type": "application/json"
+},
+
+body: JSON.stringify({
+mood,
+mealType,
+preference,
+hungerLevel,
+cuisine
+})
+
+});
+
+const data =
+await response.json();
+
+if (!response.ok) {
+
+throw new Error(
+data.reason ||
+data.error ||
+"Recommendation failed."
+);
+
+}
+
+document.getElementById("foodName").textContent =
+data.food;
+
+document.getElementById("reason").textContent =
+"Reason: " + data.reason;
+
+const tagsDiv =
+document.getElementById("tags");
+
+tagsDiv.innerHTML = "";
+
+data.tags.forEach(tag => {
+
+const span =
+document.createElement("span");
+
+span.className = "tag";
+
+span.textContent = tag;
+
+tagsDiv.appendChild(span);
+
+});
+
+result.style.display = "block";
+
+}
+
+catch(error) {
+
+errorMessage.textContent =
+error.message;
+
+errorMessage.style.display = "block";
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
