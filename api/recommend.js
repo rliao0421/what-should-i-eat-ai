@@ -6,32 +6,58 @@ const client = new OpenAI({
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Only POST requests allowed" });
+    return res.status(405).json({
+      food: "Invalid request",
+      reason: "Only POST requests allowed.",
+      tags: ["Error"]
+    });
   }
 
   try {
-    const { mood, mealType, preference, hungerLevel, cuisine } = req.body;
+    const {
+      mood,
+      mealType,
+      preference,
+      hungerLevel,
+      cuisine
+    } = req.body;
+
+    // Add randomness so recommendations change
+    const randomSeed = Math.floor(Math.random() * 100000);
 
     const response = await client.chat.completions.create({
       model: "gpt-4o-mini",
+
+      temperature: 0.9,
+
       messages: [
         {
           role: "system",
-          content: "Return only valid JSON. No markdown."
+          content:
+            "You are a helpful food recommendation assistant. Always return only valid JSON. No markdown."
         },
         {
           role: "user",
           content: `
-Situation: ${mood}
-Meal type: ${mealType}
-Preference: ${preference}
-Hunger level: ${hungerLevel}
-Cuisine: ${cuisine}
+Random variation seed: ${randomSeed}
 
-Return:
+User situation: ${mood}
+Meal type: ${mealType}
+Special preference: ${preference}
+Hunger level: ${hungerLevel}
+Cuisine preference: ${cuisine}
+
+Give ONE meal recommendation.
+
+Make the choice feel logical and personalized.
+
+Avoid repeating the same meals across requests.
+
+Return ONLY this JSON format:
+
 {
   "food": "meal name",
-  "reason": "why this meal was chosen",
+  "reason": "clear explanation why this meal fits the user's situation",
   "tags": ["tag1", "tag2", "tag3"]
 }
 `
@@ -39,18 +65,39 @@ Return:
       ]
     });
 
+    // Extract AI text
     let text = response.choices[0].message.content;
-    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
-    const recommendation = JSON.parse(text);
+    // Remove markdown if AI adds it
+    text = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
+    let recommendation;
+
+    try {
+      recommendation = JSON.parse(text);
+    } catch (parseError) {
+      console.error("JSON parse error:", text);
+
+      recommendation = {
+        food: "Chef's Surprise Bowl",
+        reason:
+          "We generated a fallback meal because the AI response format was unexpected.",
+        tags: ["Fallback", "Quick", "Reliable"]
+      };
+    }
 
     return res.status(200).json(recommendation);
+
   } catch (error) {
-    console.error(error);
+    console.error("Server error:", error);
 
     return res.status(500).json({
       food: "Recommendation failed",
-      reason: "The system could not generate a recommendation. Check API key, credits, or Vercel logs.",
+      reason:
+        "Something went wrong generating your meal. Try again shortly.",
       tags: ["Error"]
     });
   }
