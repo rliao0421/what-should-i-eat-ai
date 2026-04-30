@@ -1,187 +1,83 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>What Should I Eat?</title>
-
-<style>
-
-body {
-  font-family: Arial;
-  background: #ffe8cc;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
-
-.container {
-  background: white;
-  padding: 30px;
-  border-radius: 20px;
-  width: 600px;
-}
-
-textarea {
-  width: 100%;
-  height: 100px;
-  padding: 10px;
-  margin-bottom: 10px;
-}
-
-button {
-  padding: 12px;
-  background: #f76707;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-.result {
-  margin-top: 20px;
-  padding: 15px;
-  background: #fff9db;
-  border-radius: 15px;
-}
-
-.error {
-  color: red;
-  margin-top: 10px;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="container">
-
-<h1>What Should I Eat?</h1>
-
-<textarea id="moodInput"
-placeholder="How are you feeling?"></textarea>
-
-<select id="mealType">
-
-<option value="any">Any Meal</option>
-<option value="breakfast">Breakfast</option>
-<option value="lunch">Lunch</option>
-<option value="dinner">Dinner</option>
-<option value="snack">Snack</option>
-
-</select>
-
-<br><br>
-
-<select id="preference">
-
-<option value="any">No Preference</option>
-<option value="healthy">Healthy</option>
-<option value="comfort">Comfort Food</option>
-<option value="quick">Quick</option>
-
-</select>
-
-<br><br>
-
-<button onclick="generateRecommendation()">
-Get Recommendation
-</button>
-
-<div id="errorMessage" class="error"></div>
-
-<div id="result" class="result"></div>
-
-</div>
-
 <script>
+  function useMood(text) {
+    document.getElementById("moodInput").value = text;
+  }
 
-async function generateRecommendation() {
+  function clearForm() {
+    document.getElementById("moodInput").value = "";
+    document.getElementById("result").style.display = "none";
+    document.getElementById("errorMessage").style.display = "none";
+  }
 
-const mood =
-document.getElementById("moodInput").value;
+  async function generateRecommendation() {
+    const mood = document.getElementById("moodInput").value;
+    const hungerLevel = document.getElementById("hungerLevel").value;
+    const cuisine = document.getElementById("cuisine").value;
+    const mealType = document.getElementById("mealType").value;
+    const preference = document.getElementById("preference").value;
 
-const mealType =
-document.getElementById("mealType").value;
+    const button = document.getElementById("recommendButton");
+    const result = document.getElementById("result");
+    const errorMessage = document.getElementById("errorMessage");
 
-const preference =
-document.getElementById("preference").value;
+    result.style.display = "none";
+    errorMessage.style.display = "none";
 
-const resultDiv =
-document.getElementById("result");
+    if (mood.trim() === "") {
+      errorMessage.textContent = "Please describe your situation first.";
+      errorMessage.style.display = "block";
+      return;
+    }
 
-const errorDiv =
-document.getElementById("errorMessage");
+    button.disabled = true;
+    button.textContent = "Thinking...";
 
-errorDiv.textContent = "";
-resultDiv.innerHTML = "";
+    try {
+      const response = await fetch("/api/recommend", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          mood,
+          hungerLevel,
+          cuisine,
+          mealType,
+          preference
+        })
+      });
 
-if (mood.trim() === "") {
+      const data = await response.json();
 
-errorDiv.textContent =
-"Please describe how you're feeling.";
+      if (!response.ok) {
+        throw new Error(data.reason || data.error || "The recommendation failed.");
+      }
 
-return;
+      document.getElementById("foodName").textContent =
+        data.food || "Food recommendation";
 
-}
+      document.getElementById("reason").textContent =
+        "Reason: " + (data.reason || "No reason was returned explaining the choice.");
 
-try {
+      const tagsDiv = document.getElementById("tags");
+      tagsDiv.innerHTML = "";
 
-const response =
-await fetch("/api/recommend", {   // FIXED FOR VERCEL
+      const tags = Array.isArray(data.tags) ? data.tags : ["Recommendation"];
 
-method: "POST",
+      tags.forEach(tag => {
+        const span = document.createElement("span");
+        span.className = "tag";
+        span.textContent = tag;
+        tagsDiv.appendChild(span);
+      });
 
-headers: {
-"Content-Type": "application/json"
-},
-
-body: JSON.stringify({
-mood,
-mealType,
-preference
-})
-
-});
-
-const data =
-await response.json();
-
-if (!response.ok) {
-
-throw new Error(
-data.reason ||
-data.error ||
-"Recommendation failed"
-);
-
-}
-
-resultDiv.innerHTML =
-`
-<h2>${data.food}</h2>
-<p><strong>Reason:</strong> ${data.reason}</p>
-<p><strong>Tags:</strong> ${data.tags.join(", ")}</p>
-`;
-
-}
-
-catch(error) {
-
-errorDiv.textContent =
-error.message;
-
-}
-
-}
-
+      result.style.display = "block";
+    } catch (error) {
+      errorMessage.textContent = error.message;
+      errorMessage.style.display = "block";
+    } finally {
+      button.disabled = false;
+      button.textContent = "Get Recommendation";
+    }
+  }
 </script>
-
-</body>
-
-</html>
