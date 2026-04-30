@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,82 +8,183 @@
 
 <style>
 
+* {
+  box-sizing: border-box;
+}
+
 body {
-  font-family: Arial;
-  background: #ffe8cc;
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at top left,#ffd6a5,transparent 40%),
+    radial-gradient(circle at bottom right,#ffadad,transparent 40%),
+    linear-gradient(135deg,#fff7ed,#ffe8cc);
+
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
 }
 
-.container {
-  background: white;
+.app {
+  width: 95%;
+  max-width: 900px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 30px;
+  box-shadow: 0 25px 70px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+
+.hero {
+  background: linear-gradient(135deg,#f76707,#f03e3e);
+  color: white;
+  padding: 40px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 44px;
+  margin-bottom: 10px;
+}
+
+.hero p {
+  font-size: 18px;
+  opacity: 0.95;
+}
+
+.content {
   padding: 30px;
-  border-radius: 20px;
-  width: 600px;
+}
+
+label {
+  font-weight: bold;
+  font-size: 18px;
 }
 
 textarea {
   width: 100%;
-  height: 100px;
-  padding: 10px;
-  margin-bottom: 10px;
+  min-height: 120px;
+  padding: 15px;
+  border-radius: 18px;
+  border: 2px solid #ffd8a8;
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 15px;
 }
 
 select {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 2px solid #ffd8a8;
+  font-size: 15px;
 }
 
 button {
-  padding: 12px;
-  background: #f76707;
-  color: white;
+  margin-top: 18px;
+  width: 100%;
+  padding: 16px;
+  border-radius: 18px;
   border: none;
-  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
   cursor: pointer;
+
+  background: linear-gradient(135deg,#f76707,#f03e3e);
+  color: white;
+
+  transition: 0.2s;
 }
 
-button:disabled {
-  background: gray;
+button:hover {
+  transform: translateY(-2px);
 }
 
 .result {
-  margin-top: 20px;
-  padding: 15px;
-  background: #fff9db;
-  border-radius: 15px;
+  display: none;
+  margin-top: 25px;
+  padding: 25px;
+  border-radius: 20px;
+  background: linear-gradient(135deg,#fff9db,#fff4e6);
+  border: 2px solid #ffe066;
 }
 
-.error {
+.food-title {
+  font-size: 32px;
+  color: #c92a2a;
+}
+
+.reason {
   margin-top: 10px;
-  color: red;
+  font-size: 17px;
+  color: #444;
+}
+
+.tags {
+  margin-top: 15px;
 }
 
 .tag {
   display: inline-block;
+  padding: 7px 12px;
+  margin: 4px;
   background: white;
-  padding: 5px 10px;
-  margin: 5px;
-  border-radius: 10px;
+  border-radius: 999px;
+  border: 1px solid #ffd8a8;
+  color: #d9480f;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.error {
+  display: none;
+  margin-top: 15px;
+  padding: 12px;
+  background: #ffe3e3;
+  color: #c92a2a;
+  border-radius: 12px;
+  font-weight: bold;
+}
+
+@media (max-width:700px) {
+
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .hero h1 {
+    font-size: 32px;
+  }
+
 }
 
 </style>
-
 </head>
 
 <body>
 
-<div class="container">
+<div class="app">
 
+<div class="hero">
 <h1>What Should I Eat?</h1>
+<p>
+Answer a few questions and get a personalized meal recommendation.
+</p>
+</div>
 
-<textarea
-id="moodInput"
-placeholder="Describe your situation (example: I'm very hungry and want something quick)">
-</textarea>
+<div class="content">
+
+<label>Describe your situation</label>
+
+<textarea id="moodInput"
+placeholder="Example: I'm very hungry, want something filling, and prefer Asian food."></textarea>
+
+<div class="row">
 
 <select id="hungerLevel">
 
@@ -105,9 +205,13 @@ placeholder="Describe your situation (example: I'm very hungry and want somethin
 
 </select>
 
+</div>
+
+<div class="row">
+
 <select id="mealType">
 
-<option value="any">Any Meal</option>
+<option value="any">Meal type</option>
 <option value="breakfast">Breakfast</option>
 <option value="lunch">Lunch</option>
 <option value="dinner">Dinner</option>
@@ -117,26 +221,33 @@ placeholder="Describe your situation (example: I'm very hungry and want somethin
 
 <select id="preference">
 
-<option value="any">No Preference</option>
+<option value="any">Special preference</option>
 <option value="healthy">Healthy</option>
-<option value="comfort">Comfort Food</option>
+<option value="comfort">Comfort food</option>
 <option value="quick">Quick</option>
+<option value="cheap">Budget friendly</option>
 
 </select>
 
-<button id="recommendButton" onclick="generateRecommendation()">
+</div>
+
+<button onclick="generateRecommendation()">
+
 Get Recommendation
+
 </button>
 
 <div id="errorMessage" class="error"></div>
 
-<div id="result" class="result" style="display:none;">
+<div id="result" class="result">
 
-<h2 id="foodName"></h2>
+<h2 id="foodName" class="food-title"></h2>
 
-<p id="reason"></p>
+<p id="reason" class="reason"></p>
 
-<div id="tags"></div>
+<div id="tags" class="tags"></div>
+
+</div>
 
 </div>
 
@@ -161,29 +272,25 @@ document.getElementById("mealType").value;
 const preference =
 document.getElementById("preference").value;
 
-const button =
-document.getElementById("recommendButton");
-
-const resultDiv =
+const result =
 document.getElementById("result");
 
-const errorDiv =
+const errorMessage =
 document.getElementById("errorMessage");
 
-errorDiv.textContent = "";
-resultDiv.style.display = "none";
+result.style.display = "none";
+errorMessage.style.display = "none";
 
 if (mood.trim() === "") {
 
-errorDiv.textContent =
+errorMessage.textContent =
 "Please describe your situation.";
+
+errorMessage.style.display = "block";
 
 return;
 
 }
-
-button.disabled = true;
-button.textContent = "Thinking...";
 
 try {
 
@@ -198,10 +305,10 @@ headers: {
 
 body: JSON.stringify({
 mood,
-hungerLevel,
-cuisine,
 mealType,
-preference
+preference,
+hungerLevel,
+cuisine
 })
 
 });
@@ -214,28 +321,23 @@ if (!response.ok) {
 throw new Error(
 data.reason ||
 data.error ||
-"Recommendation failed"
+"Recommendation failed."
 );
 
 }
 
 document.getElementById("foodName").textContent =
-data.food || "Food recommendation";
+data.food;
 
 document.getElementById("reason").textContent =
-"Reason: " + (data.reason || "No reason provided.");
+"Reason: " + data.reason;
 
 const tagsDiv =
 document.getElementById("tags");
 
 tagsDiv.innerHTML = "";
 
-const tags =
-Array.isArray(data.tags)
-? data.tags
-: ["Recommendation"];
-
-tags.forEach(tag => {
+data.tags.forEach(tag => {
 
 const span =
 document.createElement("span");
@@ -248,23 +350,16 @@ tagsDiv.appendChild(span);
 
 });
 
-resultDiv.style.display = "block";
+result.style.display = "block";
 
 }
 
 catch(error) {
 
-errorDiv.textContent =
+errorMessage.textContent =
 error.message;
 
-}
-
-finally {
-
-button.disabled = false;
-
-button.textContent =
-"Get Recommendation";
+errorMessage.style.display = "block";
 
 }
 
@@ -273,5 +368,4 @@ button.textContent =
 </script>
 
 </body>
-
 </html>
